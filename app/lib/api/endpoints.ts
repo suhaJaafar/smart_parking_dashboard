@@ -1,0 +1,39 @@
+/**
+ * Single source of truth for backend (Laravel) endpoint paths.
+ *
+ * Use `endpoints.x.y()` or `endpoints.x.y` so refactors stay typed and there
+ * are no magic strings sprinkled across the codebase.
+ */
+export const endpoints = {
+	auth: {
+		login: '/api/login',
+		register: '/api/register',
+		logout: '/api/logout',
+		me: '/api/user',
+	},
+	users: {
+		list: '/api/users',
+		detail: (id: string | number) => `/api/users/${id}`,
+	},
+	parks: {
+		list: '/api/parks',
+		create: '/api/parks',
+		detail: (id: string | number) => `/api/parks/${id}`,
+		update: (id: string | number) => `/api/parks/${id}`,
+		remove: (id: string | number) => `/api/parks/${id}`,
+		mine: '/api/parks/user',
+		enterCar: (id: string | number) => `/api/parks/${id}/entercar`,
+		exitCar: (id: string | number) => `/api/parks/${id}/exitcar`,
+	},
+	customer: {
+		nearbyParks: '/api/customer/parks/nearby',
+	},
+	admin: {
+		stats: '/api/admin/stats',
+	},
+	owner: {
+		stats: '/api/owner/stats',
+	},
+} as const;
+
+export type Endpoints = typeof endpoints;
