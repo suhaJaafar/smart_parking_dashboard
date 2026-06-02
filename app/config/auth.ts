@@ -9,7 +9,7 @@ export const authConfig = {
 		name: env.SESSION_COOKIE_NAME,
 		maxAge: env.SESSION_MAX_AGE,
 		httpOnly: true,
-		secure: env.NODE_ENV === 'production',
+		secure: env.SESSION_COOKIE_SECURE,
 		sameSite: 'lax',
 		path: '/',
 	},

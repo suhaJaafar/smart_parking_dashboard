@@ -14,6 +14,17 @@ const ServerSchema = z.object({
 		.default('http://127.0.0.1:8000')
 		.transform((u) => u.replace(/\/+$/, '')),
 	SESSION_COOKIE_NAME: z.string().min(1).default('sp_token'),
+	SESSION_COOKIE_SECURE: z
+		.preprocess((v) => {
+			if (typeof v === 'boolean') return v;
+			if (typeof v === 'string') {
+				const n = v.trim().toLowerCase();
+				if (['1', 'true', 'yes', 'on'].includes(n)) return true;
+				if (['0', 'false', 'no', 'off'].includes(n)) return false;
+			}
+			return undefined;
+		}, z.boolean())
+		.optional(),
 	SESSION_MAX_AGE: z.coerce
 		.number()
 		.int()
@@ -27,6 +38,7 @@ const ServerSchema = z.object({
 const parsed = ServerSchema.safeParse({
 	LARAVEL_API_URL: process.env.LARAVEL_API_URL,
 	SESSION_COOKIE_NAME: process.env.SESSION_COOKIE_NAME,
+	SESSION_COOKIE_SECURE: process.env.SESSION_COOKIE_SECURE,
 	SESSION_MAX_AGE: process.env.SESSION_MAX_AGE,
 	NODE_ENV: process.env.NODE_ENV,
 });
@@ -39,5 +51,9 @@ if (!parsed.success) {
 	throw new Error(`Invalid environment variables:\n${issues}`);
 }
 
-export const env = parsed.data;
+export const env = {
+	...parsed.data,
+	SESSION_COOKIE_SECURE:
+		parsed.data.SESSION_COOKIE_SECURE ?? parsed.data.NODE_ENV === 'production',
+} as const;
 export type Env = typeof env;
