@@ -51,6 +51,22 @@ export default function LoginPage() {
 				/>
 			</form>
 
+			<div className='relative'>
+				<div className='absolute inset-0 flex items-center'>
+					<span className='w-full border-t border-zinc-200 dark:border-zinc-800' />
+				</div>
+				<div className='relative flex justify-center text-xs uppercase'>
+					<span className='bg-background px-2 text-zinc-500'>or</span>
+				</div>
+			</div>
+
+			<Link
+				href='/auth/whatsapp'
+				className='flex h-10 items-center justify-center rounded-md border border-zinc-300 bg-white text-sm font-medium shadow-sm hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:bg-zinc-800'
+			>
+				Sign in with WhatsApp
+			</Link>
+
 			<p className='text-center text-sm text-zinc-600 dark:text-zinc-400'>
 				Don&apos;t have an account?{' '}
 				<Link

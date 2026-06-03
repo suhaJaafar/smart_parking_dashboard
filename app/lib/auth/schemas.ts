@@ -22,5 +22,32 @@ export const registerSchema = z.object({
 		.or(z.literal('')),
 });
 
+/**
+ * WhatsApp OTP login. The backend accepts either +<country><number> or just
+ * digits — we keep validation lax here and let Laravel be the source of truth
+ * for the exact regex.
+ */
+export const whatsappRequestCodeSchema = z.object({
+	phone_number: z
+		.string()
+		.trim()
+		.regex(/^\+?[0-9]{8,15}$/, 'Enter a valid phone number with country code.'),
+});
+
+export const whatsappVerifyCodeSchema = z.object({
+	phone_number: z
+		.string()
+		.trim()
+		.regex(/^\+?[0-9]{8,15}$/, 'Enter a valid phone number with country code.'),
+	code: z
+		.string()
+		.trim()
+		.regex(/^[0-9]{6}$/, 'Enter the 6-digit code we sent on WhatsApp.'),
+});
+
 export type LoginInput = z.infer<typeof loginSchema>;
 export type RegisterInput = z.infer<typeof registerSchema>;
+export type WhatsappRequestCodeInput = z.infer<
+	typeof whatsappRequestCodeSchema
+>;
+export type WhatsappVerifyCodeInput = z.infer<typeof whatsappVerifyCodeSchema>;
