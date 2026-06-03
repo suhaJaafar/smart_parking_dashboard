@@ -10,6 +10,8 @@ export const endpoints = {
 		register: '/api/register',
 		logout: '/api/logout',
 		me: '/api/user',
+		whatsappRequestCode: '/api/auth/whatsapp/request-code',
+		whatsappVerifyCode: '/api/auth/whatsapp/verify-code',
 	},
 	users: {
 		list: '/api/users',
