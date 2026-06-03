@@ -110,31 +110,37 @@ export default async function ParkingDetailPage({
 							const plate = [car.plate_prefix, car.car_number]
 								.filter(Boolean)
 								.join(' ');
+							const phone = car.user?.phone_number ?? null;
 							return (
 								<li
 									key={car.id}
 									className='flex items-center justify-between gap-4 py-3'
 								>
-									<div className='flex min-w-0 items-center gap-3'>
-										<span className='inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-zinc-200 bg-zinc-50 text-xs font-semibold text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-300'>
-											{car.model?.[0]?.toUpperCase() ?? '?'}
-										</span>
-										<div className='min-w-0'>
-											<p className='truncate text-sm font-medium'>
-												{car.model || 'Unknown model'}
-											</p>
-											{car.user ? (
-												<p className='truncate text-xs text-zinc-500'>
-													{car.user.name}
-													<span className='mx-1'>·</span>
-													{car.user.email}
-												</p>
-											) : null}
-										</div>
+									<div className='min-w-0'>
+										<dt className='text-xs uppercase tracking-wide text-zinc-500'>
+											Car number
+										</dt>
+										<dd className='mt-0.5 font-mono text-sm font-semibold tracking-wider text-zinc-900 dark:text-zinc-100'>
+											{plate || '—'}
+										</dd>
 									</div>
-									<span className='inline-flex shrink-0 items-center rounded-md border border-zinc-300 bg-white px-2 py-1 font-mono text-xs tracking-wider text-zinc-800 shadow-sm dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-200'>
-										{plate || '—'}
-									</span>
+									<div className='min-w-0 text-right'>
+										<dt className='text-xs uppercase tracking-wide text-zinc-500'>
+											Owner phone
+										</dt>
+										<dd className='mt-0.5 text-sm'>
+											{phone ? (
+												<a
+													href={`tel:${phone}`}
+													className='font-mono text-zinc-900 hover:underline dark:text-zinc-100'
+												>
+													{phone}
+												</a>
+											) : (
+												<span className='text-zinc-400'>—</span>
+											)}
+										</dd>
+									</div>
 								</li>
 							);
 						})}
