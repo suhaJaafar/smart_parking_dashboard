@@ -34,3 +34,7 @@ export interface WhatsappRequestCodeResponse {
 
 /** Successful response from `/api/auth/whatsapp/verify-code`. */
 export type WhatsappVerifyCodeResponse = AuthResponse;
+
+/** Successful response from `/api/auth/telegram/verify-code`. The one-time
+ *  code is issued inside the Telegram bot; the dashboard only verifies it. */
+export type TelegramVerifyCodeResponse = AuthResponse;

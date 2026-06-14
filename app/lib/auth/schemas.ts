@@ -45,9 +45,22 @@ export const whatsappVerifyCodeSchema = z.object({
 		.regex(/^[0-9]{6}$/, 'Enter the 6-digit code we sent on WhatsApp.'),
 });
 
+/**
+ * Telegram OTP login. The 6-digit code is issued inside the Telegram bot
+ * (the owner taps "login to dashboard"); the dashboard only verifies it, so
+ * there is no phone number to collect here.
+ */
+export const telegramVerifyCodeSchema = z.object({
+	code: z
+		.string()
+		.trim()
+		.regex(/^[0-9]{6}$/, 'Enter the 6-digit code from the Telegram bot.'),
+});
+
 export type LoginInput = z.infer<typeof loginSchema>;
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type WhatsappRequestCodeInput = z.infer<
 	typeof whatsappRequestCodeSchema
 >;
 export type WhatsappVerifyCodeInput = z.infer<typeof whatsappVerifyCodeSchema>;
+export type TelegramVerifyCodeInput = z.infer<typeof telegramVerifyCodeSchema>;

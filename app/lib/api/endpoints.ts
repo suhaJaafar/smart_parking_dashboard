@@ -12,6 +12,7 @@ export const endpoints = {
 		me: '/api/user',
 		whatsappRequestCode: '/api/auth/whatsapp/request-code',
 		whatsappVerifyCode: '/api/auth/whatsapp/verify-code',
+		telegramVerifyCode: '/api/auth/telegram/verify-code',
 	},
 	users: {
 		list: '/api/users',
