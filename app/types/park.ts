@@ -1,3 +1,4 @@
+import type { Car } from './car';
 import type { Country } from './country';
 import type { Location } from './location';
 import type { State } from './state';
@@ -20,6 +21,8 @@ export interface Park {
 	location?: Location | null;
 	/** Eager-loaded for admin views (`index`/`show`). */
 	owner?: ParkOwner | null;
+	/** Eager-loaded on `show`: cars currently reserved/parked in this park. */
+	cars?: Car[];
 	created_at?: string;
 	updated_at?: string;
 }

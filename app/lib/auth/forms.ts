@@ -34,3 +34,11 @@ export type WhatsappVerifyCodeFormValues = Record<
 >;
 export type WhatsappVerifyCodeFormState =
 	FormState<WhatsappVerifyCodeFormValues>;
+
+export const TELEGRAM_VERIFY_CODE_FIELDS = ['code'] as const;
+export type TelegramVerifyCodeFormValues = Record<
+	(typeof TELEGRAM_VERIFY_CODE_FIELDS)[number],
+	string
+>;
+export type TelegramVerifyCodeFormState =
+	FormState<TelegramVerifyCodeFormValues>;

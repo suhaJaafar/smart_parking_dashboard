@@ -67,6 +67,13 @@ export default function LoginPage() {
 				Sign in with WhatsApp
 			</Link>
 
+			<Link
+				href='/auth/telegram'
+				className='flex h-10 items-center justify-center rounded-md border border-zinc-300 bg-white text-sm font-medium shadow-sm hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:bg-zinc-800'
+			>
+				Sign in with Telegram
+			</Link>
+
 			<p className='text-center text-sm text-zinc-600 dark:text-zinc-400'>
 				Don&apos;t have an account?{' '}
 				<Link
