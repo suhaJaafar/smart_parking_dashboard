@@ -36,6 +36,11 @@ export const endpoints = {
 	},
 	owner: {
 		stats: '/api/owner/stats',
+		coOwnerRequests: '/api/owner/co-owner-requests',
+		approveCoOwnerRequest: (id: string | number) =>
+			`/api/owner/co-owner-requests/${id}/approve`,
+		rejectCoOwnerRequest: (id: string | number) =>
+			`/api/owner/co-owner-requests/${id}/reject`,
 	},
 } as const;
 
