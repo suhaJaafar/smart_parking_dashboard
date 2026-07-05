@@ -11,6 +11,11 @@ export const dashboardNav: readonly NavItem[] = [
 	{ label: 'Overview', href: '/dashboard' },
 	{ label: 'Parkings', href: '/dashboard/parkings' },
 	{
+		label: 'Cars',
+		href: '/dashboard/cars',
+		roles: [RoleType.SPACE_OWNER],
+	},
+	{
 		label: 'Space owners',
 		href: '/dashboard/co-owners',
 		roles: [RoleType.SPACE_OWNER],
