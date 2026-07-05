@@ -3,10 +3,10 @@ import 'server-only';
 import { api } from '@/app/lib/api/server-client';
 import { endpoints } from '@/app/lib/api/endpoints';
 import type { ApiResult } from '@/app/types/api';
-import type { Paginated } from '@/app/types/pagination';
 import type {
 	CreateOwnerCarPayload,
 	OwnerCar,
+	OwnerCarsPage,
 	UpdateOwnerCarPayload,
 } from '@/app/types/car';
 
@@ -19,14 +19,18 @@ import type {
  * `canManageOwnerCars(user)` rather than rely on the 403 to bubble up.
  */
 
-/** Page through the owner's cars, optionally filtered to a single garage. */
+/**
+ * Page through the owner's parked cars, optionally filtered to a single
+ * garage. The response also carries the cars still *waiting to enter* (holds
+ * that reserved a slot but haven't driven in) under `waiting`.
+ */
 export function listOwnerCars(
 	options: { page?: number; parkId?: string } = {},
-): Promise<ApiResult<Paginated<OwnerCar>>> {
+): Promise<ApiResult<OwnerCarsPage>> {
 	const { page = 1, parkId } = options;
 	const qs = new URLSearchParams({ page: String(page) });
 	if (parkId) qs.set('park_id', parkId);
-	return api.get<Paginated<OwnerCar>>(
+	return api.get<OwnerCarsPage>(
 		`${endpoints.owner.cars.list}?${qs.toString()}`,
 	);
 }

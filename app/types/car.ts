@@ -1,3 +1,5 @@
+import type { Paginated } from '@/app/types/pagination';
+
 /**
  * Car entity as returned by `CarResource`.
  *
@@ -58,4 +60,48 @@ export interface UpdateOwnerCarPayload {
 	plate_prefix?: string;
 	car_number?: string;
 	model?: string;
+}
+
+/**
+ * A pending reservation (hold) returned by `/api/owner/cars/waiting`
+ * (backed by `OwnerHoldResource`): a customer who reserved a slot from the
+ * bot but whose car hasn't physically entered the garage yet. These holds do
+ * NOT occupy a physical space (free_spaces only drops on real entry) — they
+ * are shown so the owner can see who is on the way.
+ */
+export interface OwnerHold {
+	id: string;
+	booking_code: string | null;
+	status: 'waiting';
+	is_pre_booking: boolean;
+	park_id: string | null;
+	park?: {
+		id: string;
+		name: string;
+	};
+	customer?: {
+		id: string;
+		name: string;
+		phone_number: string | null;
+	};
+	/** The customer's most recent car, if one is known yet. */
+	car: {
+		id: string;
+		plate_prefix: string | null;
+		car_number: string;
+		plate: string;
+		model: string | null;
+	} | null;
+	scheduled_at: string | null;
+	expires_at: string | null;
+	reserved_at: string | null;
+}
+
+/**
+ * The `GET /api/owner/cars` response. The parked cars are the paginated
+ * `data`; the cars still waiting to enter ride along under `waiting` so the
+ * dashboard gets the whole picture in a single request.
+ */
+export interface OwnerCarsPage extends Paginated<OwnerCar> {
+	waiting: OwnerHold[];
 }

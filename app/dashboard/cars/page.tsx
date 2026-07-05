@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { Pagination } from '@/app/components/pagination';
 import { CarsTable } from '@/app/dashboard/cars/cars-table';
 import { ParkFilter, type ParkOption } from '@/app/dashboard/cars/park-filter';
+import { WaitingTable } from '@/app/dashboard/cars/waiting-table';
 import { getCurrentUser, requireAuth } from '@/app/lib/auth/dal';
 import { listOwnerCars } from '@/app/lib/cars/api';
 import { canManageOwnerCars } from '@/app/lib/cars/permissions';
@@ -39,6 +40,8 @@ export default async function CarsPage({ searchParams }: PageProps) {
 		listOwnerCars({ page: pageNumber, parkId }),
 		loadParkOptions(),
 	]);
+
+	const waiting = carsRes.ok ? carsRes.data.waiting : [];
 
 	return (
 		<div className='space-y-6'>
@@ -90,6 +93,25 @@ export default async function CarsPage({ searchParams }: PageProps) {
 					last={carsRes.data.meta.last_page}
 					basePath={BASE_PATH}
 				/>
+			) : null}
+
+			{waiting.length > 0 ? (
+				<section className='space-y-3 pt-2'>
+					<div>
+						<h2 className='flex items-center gap-2 text-lg font-semibold tracking-tight'>
+							Waiting to enter
+							<span className='inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-amber-100 px-1.5 text-xs font-semibold text-amber-800 dark:bg-amber-950/50 dark:text-amber-300'>
+								{waiting.length}
+							</span>
+						</h2>
+						<p className='text-sm text-zinc-600 dark:text-zinc-400'>
+							Cars that reserved a spot from the bot but haven&apos;t driven in
+							yet. They don&apos;t take a physical space until they actually
+							enter.
+						</p>
+					</div>
+					<WaitingTable holds={waiting} />
+				</section>
 			) : null}
 		</div>
 	);
