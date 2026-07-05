@@ -38,7 +38,7 @@ export function ParkFilter({
 				onChange={(e) => onChange(e.currentTarget.value)}
 				className='h-9 rounded-md border border-zinc-300 bg-white px-3 text-sm shadow-sm outline-none focus:border-zinc-500 focus:ring-2 focus:ring-zinc-200 dark:border-zinc-700 dark:bg-zinc-900 dark:focus:ring-zinc-800'
 			>
-				<option value=''>All garages</option>
+				<option value=''>All parks</option>
 				{parks.map((p) => (
 					<option key={p.id} value={p.id}>
 						{p.name}
