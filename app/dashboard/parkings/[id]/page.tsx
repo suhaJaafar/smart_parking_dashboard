@@ -3,15 +3,18 @@ import { notFound } from 'next/navigation';
 
 import { DataList, DataListItem } from '@/app/components/data-list';
 import { DeleteParkButton } from '@/app/dashboard/parkings/delete-park-button';
+import { ReservationsTable } from '@/app/dashboard/reservations/reservations-table';
 import { getCurrentUser, requireAuth } from '@/app/lib/auth/dal';
 // import { EMPTY, or } from '@/app/lib/format';
 import { formatLocationName } from '@/app/lib/locations/format';
 import { getPark } from '@/app/lib/parks/api';
-import { canManagePark } from '@/app/lib/parks/permissions';
+import { canManagePark, isParkOwner } from '@/app/lib/parks/permissions';
+import { listOwnerReservations } from '@/app/lib/reservations/api';
+import { canManageOwnerReservations } from '@/app/lib/reservations/permissions';
 
 interface PageProps {
 	params: Promise<{ id: string }>;
-	searchParams: Promise<{ error?: string }>;
+	searchParams: Promise<{ error?: string; ok?: string }>;
 }
 
 export default async function ParkingDetailPage({
@@ -21,7 +24,7 @@ export default async function ParkingDetailPage({
 	await requireAuth();
 	const user = (await getCurrentUser())!;
 	const { id } = await params;
-	const { error } = await searchParams;
+	const { error, ok } = await searchParams;
 
 	const res = await getPark(id);
 	if (!res.ok && res.status === 404) notFound();
@@ -38,6 +41,20 @@ export default async function ParkingDetailPage({
 	const loc = park.location;
 	const cars = park.cars ?? [];
 	const occupied = Math.max(park.capacity - park.free_spaces, 0);
+
+	// Reservations must be scoped to the ACTUAL park owner, not the broader
+	// `canManagePark` (which lets SUPER_ADMIN see any park). The backend's
+	// `owner/reservations?park_id=` silently drops an unowned id and would
+	// otherwise show the admin their own unrelated reservations under a
+	// stranger's park.
+	const showReservations =
+		canManageOwnerReservations(user) && isParkOwner(user, park);
+	const reservationsRes = showReservations
+		? await listOwnerReservations({ parkId: park.id, filter: 'live' })
+		: null;
+	const liveReservations =
+		reservationsRes && reservationsRes.ok ? reservationsRes.data.data : [];
+	const redirectTo = `/dashboard/parkings/${park.id}`;
 
 	return (
 		<div className='space-y-6'>
@@ -62,13 +79,31 @@ export default async function ParkingDetailPage({
 				) : null}
 			</div>
 
+			{ok ? (
+				<p className='rounded-md border border-emerald-300 bg-emerald-50 px-3 py-2 text-sm text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-300'>
+					{ok === 'cancelled'
+						? 'Reservation cancelled. The customer has been notified.'
+						: ok === 'exited'
+							? 'Car exited and slot freed. Reservation marked completed.'
+							: 'Done.'}
+				</p>
+			) : null}
+
 			{error ? (
 				<p className='rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300'>
 					{error === 'forbidden'
 						? 'You are not allowed to perform that action.'
 						: error === 'delete_failed'
 							? 'Failed to delete the parking.'
-							: 'Something went wrong.'}
+							: error === 'not_found'
+								? 'That reservation was not found in this garage.'
+								: error === 'invalid_state'
+									? 'The reservation is no longer in a state where that action is allowed.'
+									: error === 'cancel_failed'
+										? 'Failed to cancel the reservation.'
+										: error === 'exit_failed'
+											? 'Failed to exit the car.'
+											: 'Something went wrong.'}
 				</p>
 			) : null}
 
@@ -85,6 +120,44 @@ export default async function ParkingDetailPage({
 					) : null}
 				</DataList>
 			</section>
+
+			{showReservations ? (
+				<section className='rounded-xl border border-black/[.06] bg-white p-5 dark:border-white/[.08] dark:bg-zinc-950'>
+					<div className='flex items-center justify-between gap-3'>
+						<div>
+							<h2 className='text-sm font-semibold'>Active reservations</h2>
+							<p className='mt-0.5 text-xs text-zinc-500'>
+								Waiting holds and cars currently inside this garage. Cancel a
+								hold or drive a car out — same as the bot.
+							</p>
+						</div>
+						<Link
+							href={`/dashboard/reservations?park_id=${park.id}`}
+							className='text-xs text-zinc-600 hover:underline dark:text-zinc-400'
+						>
+							View all →
+						</Link>
+					</div>
+
+					<div className='mt-4'>
+						{reservationsRes && !reservationsRes.ok ? (
+							<p className='rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300'>
+								{reservationsRes.error?.message ??
+									'Failed to load reservations.'}
+							</p>
+						) : liveReservations.length === 0 ? (
+							<div className='rounded-md border border-dashed border-zinc-300 px-4 py-8 text-center text-sm text-zinc-500 dark:border-zinc-800'>
+								No active reservations in this garage right now.
+							</div>
+						) : (
+							<ReservationsTable
+								reservations={liveReservations}
+								redirectTo={redirectTo}
+							/>
+						)}
+					</div>
+				</section>
+			) : null}
 
 			<section className='rounded-xl border border-black/[.06] bg-white p-5 dark:border-white/[.08] dark:bg-zinc-950'>
 				<div className='flex items-center justify-between gap-3'>
