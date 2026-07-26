@@ -33,9 +33,11 @@ export const endpoints = {
 	},
 	admin: {
 		stats: '/api/admin/stats',
+		reservationStats: '/api/admin/reservation-stats',
 	},
 	owner: {
 		stats: '/api/owner/stats',
+		reservationStats: '/api/owner/reservation-stats',
 		coOwnerRequests: '/api/owner/co-owner-requests',
 		approveCoOwnerRequest: (id: string | number) =>
 			`/api/owner/co-owner-requests/${id}/approve`,
