@@ -21,6 +21,11 @@ export const dashboardNav: readonly NavItem[] = [
 		roles: [RoleType.SPACE_OWNER],
 	},
 	{
+		label: 'Analytics',
+		href: '/dashboard/reservations/stats',
+		roles: [RoleType.SPACE_OWNER, RoleType.SUPER_ADMIN, RoleType.ADMIN],
+	},
+	{
 		label: 'Space owners',
 		href: '/dashboard/co-owners',
 		roles: [RoleType.SPACE_OWNER],

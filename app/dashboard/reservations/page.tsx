@@ -11,6 +11,8 @@ import { getCurrentUser, requireAuth } from '@/app/lib/auth/dal';
 import { listMyParks } from '@/app/lib/parks/api';
 import { listOwnerReservations } from '@/app/lib/reservations/api';
 import { canManageOwnerReservations } from '@/app/lib/reservations/permissions';
+import { canViewAnyReservationStats } from '@/app/lib/reservation-stats/permissions';
+import Link from 'next/link';
 import type { ReservationFilter } from '@/app/types/reservation';
 
 interface PageProps {
@@ -80,6 +82,14 @@ export default async function ReservationsPage({ searchParams }: PageProps) {
 						bot uses.
 					</p>
 				</div>
+				{canViewAnyReservationStats(user) ? (
+					<Link
+						href='/dashboard/reservations/stats'
+						className='inline-flex h-9 items-center rounded-md border border-zinc-300 px-3 text-sm font-medium hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-900'
+					>
+						View analytics
+					</Link>
+				) : null}
 			</div>
 
 			{ok ? (
