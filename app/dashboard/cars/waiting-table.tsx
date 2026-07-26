@@ -12,6 +12,7 @@ export function WaitingTable({ holds }: { holds: readonly OwnerHold[] }) {
 			<table className='w-full text-sm'>
 				<thead className='bg-amber-50 text-left text-xs uppercase tracking-wide text-amber-700 dark:bg-amber-950/30 dark:text-amber-300/80'>
 					<tr>
+						<th className='px-4 py-3 font-medium'>Code</th>
 						<th className='px-4 py-3 font-medium'>Plate</th>
 						<th className='px-4 py-3 font-medium'>Garage</th>
 						<th className='px-4 py-3 font-medium'>Customer</th>
@@ -34,6 +35,15 @@ function Row({ hold }: { hold: OwnerHold }) {
 
 	return (
 		<tr className='hover:bg-amber-50/40 dark:hover:bg-amber-950/10'>
+			<td className='px-4 py-3'>
+				{hold.booking_code ? (
+					<span className='inline-flex items-center rounded-md bg-amber-100 px-2 py-1 font-mono text-sm font-bold tracking-widest text-amber-900 dark:bg-amber-950/50 dark:text-amber-200'>
+						{hold.booking_code}
+					</span>
+				) : (
+					<span className='text-xs text-zinc-500'>—</span>
+				)}
+			</td>
 			<td className='px-4 py-3'>
 				{hold.car?.plate ? (
 					<span className='font-mono text-sm font-semibold tracking-wider text-zinc-900 dark:text-zinc-100'>

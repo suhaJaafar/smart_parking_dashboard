@@ -48,6 +48,12 @@ export const endpoints = {
 			update: (id: string | number) => `/api/owner/cars/${id}`,
 			remove: (id: string | number) => `/api/owner/cars/${id}`,
 		},
+		reservations: {
+			list: '/api/owner/reservations',
+			detail: (id: string | number) => `/api/owner/reservations/${id}`,
+			cancel: (id: string | number) => `/api/owner/reservations/${id}/cancel`,
+			exit: (id: string | number) => `/api/owner/reservations/${id}/exit`,
+		},
 	},
 } as const;
 
