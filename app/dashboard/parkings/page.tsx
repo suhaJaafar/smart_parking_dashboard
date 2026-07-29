@@ -10,6 +10,7 @@ import {
 	canManagePark,
 	canViewAllParks,
 } from '@/app/lib/parks/permissions';
+import { getPageStartIndex } from '@/app/lib/table-index';
 
 interface PageProps {
 	searchParams: Promise<{ page?: string; error?: string }>;
@@ -68,6 +69,10 @@ export default async function ParkingsPage({ searchParams }: PageProps) {
 					parks={res.data.data}
 					showOwner={showAll}
 					canManage={(park) => canManagePark(user, park)}
+					startIndex={getPageStartIndex(
+						res.data.meta.current_page,
+						res.data.meta.per_page,
+					)}
 				/>
 			)}
 

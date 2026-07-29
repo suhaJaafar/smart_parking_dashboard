@@ -11,6 +11,7 @@ import { getCurrentUser, requireAuth } from '@/app/lib/auth/dal';
 import { listParkUsers } from '@/app/lib/park-users/api';
 import { canViewParkUsers } from '@/app/lib/park-users/permissions';
 import { listMyParks } from '@/app/lib/parks/api';
+import { getPageStartIndex } from '@/app/lib/table-index';
 
 interface PageProps {
 	searchParams: Promise<{
@@ -69,7 +70,13 @@ export default async function CustomersPage({ searchParams }: PageProps) {
 					{usersRes.error?.message ?? 'Failed to load customers.'}
 				</p>
 			) : (
-				<CustomersTable rows={usersRes.data.data} />
+				<CustomersTable
+					rows={usersRes.data.data}
+					startIndex={getPageStartIndex(
+						usersRes.data.meta.current_page,
+						usersRes.data.meta.per_page,
+					)}
+				/>
 			)}
 
 			{usersRes.ok ? (

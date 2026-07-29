@@ -10,14 +10,17 @@ import type { CoOwnerRequest } from '@/app/types/co-owner';
  */
 export function CoOwnersTable({
 	requests,
+	startIndex = 1,
 }: {
 	requests: readonly CoOwnerRequest[];
+	startIndex?: number;
 }) {
 	return (
 		<div className='overflow-x-auto rounded-xl border border-black/[.06] bg-white dark:border-white/[.08] dark:bg-zinc-950'>
 			<table className='w-full text-sm'>
 				<thead className='bg-zinc-50 text-left text-xs uppercase tracking-wide text-zinc-500 dark:bg-zinc-900/60'>
 					<tr>
+						<th className='w-16 px-4 py-3 font-medium'>No.</th>
 						<th className='px-4 py-3 font-medium'>Name</th>
 						<th className='px-4 py-3 font-medium'>Phone</th>
 						<th className='px-4 py-3 font-medium'>Requested garage</th>
@@ -29,8 +32,8 @@ export function CoOwnersTable({
 					</tr>
 				</thead>
 				<tbody className='divide-y divide-zinc-100 dark:divide-zinc-800'>
-					{requests.map((r) => (
-						<Row key={r.id} request={r} />
+					{requests.map((r, rowIndex) => (
+						<Row key={r.id} request={r} index={startIndex + rowIndex} />
 					))}
 				</tbody>
 			</table>
@@ -38,11 +41,14 @@ export function CoOwnersTable({
 	);
 }
 
-function Row({ request }: { request: CoOwnerRequest }) {
+function Row({ request, index }: { request: CoOwnerRequest; index: number }) {
 	const parkName = request.park?.name ?? null;
 
 	return (
 		<tr className='hover:bg-zinc-50/60 dark:hover:bg-zinc-900/40'>
+			<td className='px-4 py-3 text-sm tabular-nums text-zinc-500 dark:text-zinc-400'>
+				{index}
+			</td>
 			<td className='px-4 py-3 font-medium'>{request.requester_name}</td>
 			<td className='px-4 py-3 text-zinc-700 dark:text-zinc-300'>
 				<a

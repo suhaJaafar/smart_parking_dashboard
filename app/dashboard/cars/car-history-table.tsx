@@ -9,7 +9,13 @@ import type { ParkCarHistory } from '@/app/types/car';
  * left. Read-only — it complements the live "currently parked" list with the
  * full history (plate, owner, contact, model, entry/exit, duration).
  */
-export function CarHistoryTable({ rows }: { rows: readonly ParkCarHistory[] }) {
+export function CarHistoryTable({
+	rows,
+	startIndex = 1,
+}: {
+	rows: readonly ParkCarHistory[];
+	startIndex?: number;
+}) {
 	if (rows.length === 0) {
 		return (
 			<div className='rounded-md border border-dashed border-zinc-300 px-4 py-8 text-center text-sm text-zinc-500 dark:border-zinc-800'>
@@ -23,6 +29,7 @@ export function CarHistoryTable({ rows }: { rows: readonly ParkCarHistory[] }) {
 			<table className='w-full text-sm'>
 				<thead className='bg-zinc-50 text-left text-xs uppercase tracking-wide text-zinc-500 dark:bg-zinc-900/40 dark:text-zinc-400'>
 					<tr>
+						<th className='w-16 px-4 py-3 font-medium'>No.</th>
 						<th className='px-4 py-3 font-medium'>Code</th>
 						<th className='px-4 py-3 font-medium'>Plate</th>
 						<th className='px-4 py-3 font-medium'>Model</th>
@@ -34,8 +41,8 @@ export function CarHistoryTable({ rows }: { rows: readonly ParkCarHistory[] }) {
 					</tr>
 				</thead>
 				<tbody className='divide-y divide-zinc-100 dark:divide-zinc-800'>
-					{rows.map((r) => (
-						<Row key={r.id} row={r} />
+					{rows.map((r, rowIndex) => (
+						<Row key={r.id} row={r} index={startIndex + rowIndex} />
 					))}
 				</tbody>
 			</table>
@@ -43,11 +50,14 @@ export function CarHistoryTable({ rows }: { rows: readonly ParkCarHistory[] }) {
 	);
 }
 
-function Row({ row }: { row: ParkCarHistory }) {
+function Row({ row, index }: { row: ParkCarHistory; index: number }) {
 	const phone = row.customer?.phone_number ?? null;
 
 	return (
 		<tr className='hover:bg-zinc-50/60 dark:hover:bg-zinc-900/30'>
+			<td className='px-4 py-3 text-sm tabular-nums text-zinc-500 dark:text-zinc-400'>
+				{index}
+			</td>
 			<td className='px-4 py-3'>
 				{row.booking_code ? (
 					<span className='inline-flex items-center rounded-md bg-zinc-100 px-2 py-1 font-mono text-xs font-bold tracking-widest text-zinc-700 dark:bg-zinc-900 dark:text-zinc-300'>

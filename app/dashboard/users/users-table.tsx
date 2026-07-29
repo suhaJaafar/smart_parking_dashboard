@@ -13,15 +13,18 @@ import type { User } from '@/app/types/user';
 export function UsersTable({
 	users,
 	currentUserId,
+	startIndex = 1,
 }: {
 	users: readonly User[];
 	currentUserId: string;
+	startIndex?: number;
 }) {
 	return (
 		<div className='overflow-x-auto rounded-xl border border-black/[.06] bg-white dark:border-white/[.08] dark:bg-zinc-950'>
 			<table className='w-full text-sm'>
 				<thead className='bg-zinc-50 text-left text-xs uppercase tracking-wide text-zinc-500 dark:bg-zinc-900/60'>
 					<tr>
+						<th className='w-16 px-4 py-3 font-medium'>No.</th>
 						<th className='px-4 py-3 font-medium'>Name</th>
 						<th className='px-4 py-3 font-medium'>Email</th>
 						<th className='px-4 py-3 font-medium'>Phone</th>
@@ -33,8 +36,13 @@ export function UsersTable({
 					</tr>
 				</thead>
 				<tbody className='divide-y divide-zinc-100 dark:divide-zinc-800'>
-					{users.map((u) => (
-						<Row key={u.id} user={u} isSelf={u.id === currentUserId} />
+					{users.map((u, rowIndex) => (
+						<Row
+							key={u.id}
+							user={u}
+							isSelf={u.id === currentUserId}
+							index={startIndex + rowIndex}
+						/>
 					))}
 				</tbody>
 			</table>
@@ -42,9 +50,20 @@ export function UsersTable({
 	);
 }
 
-function Row({ user, isSelf }: { user: User; isSelf: boolean }) {
+function Row({
+	user,
+	isSelf,
+	index,
+}: {
+	user: User;
+	isSelf: boolean;
+	index: number;
+}) {
 	return (
 		<tr className='hover:bg-zinc-50/60 dark:hover:bg-zinc-900/40'>
+			<td className='px-4 py-3 text-sm tabular-nums text-zinc-500 dark:text-zinc-400'>
+				{index}
+			</td>
 			<td className='px-4 py-3'>
 				<Link
 					href={`/dashboard/users/${user.id}`}

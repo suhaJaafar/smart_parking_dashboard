@@ -16,16 +16,19 @@ export function ParksTable({
 	parks,
 	showOwner,
 	canManage,
+	startIndex = 1,
 }: {
 	parks: readonly Park[];
 	showOwner: boolean;
 	canManage: (park: Park) => boolean;
+	startIndex?: number;
 }) {
 	return (
 		<div className='overflow-x-auto rounded-xl border border-black/[.06] bg-white dark:border-white/[.08] dark:bg-zinc-950'>
 			<table className='w-full text-sm'>
 				<thead className='bg-zinc-50 text-left text-xs uppercase tracking-wide text-zinc-500 dark:bg-zinc-900/60'>
 					<tr>
+						<th className='w-16 px-4 py-3 font-medium'>No.</th>
 						<th className='px-4 py-3 font-medium'>Name</th>
 						{showOwner ? (
 							<th className='px-4 py-3 font-medium'>Owner</th>
@@ -41,12 +44,13 @@ export function ParksTable({
 					</tr>
 				</thead>
 				<tbody className='divide-y divide-zinc-100 dark:divide-zinc-800'>
-					{parks.map((park) => (
+					{parks.map((park, rowIndex) => (
 						<Row
 							key={park.id}
 							park={park}
 							showOwner={showOwner}
 							canManage={canManage(park)}
+							index={startIndex + rowIndex}
 						/>
 					))}
 				</tbody>
@@ -59,10 +63,12 @@ function Row({
 	park,
 	showOwner,
 	canManage,
+	index,
 }: {
 	park: Park;
 	showOwner: boolean;
 	canManage: boolean;
+	index: number;
 }) {
 	const loc = park.location;
 	const pct = occupancyPct(park.capacity, park.free_spaces);
@@ -70,6 +76,9 @@ function Row({
 
 	return (
 		<tr className='hover:bg-zinc-50/60 dark:hover:bg-zinc-900/40'>
+			<td className='px-4 py-3 text-sm tabular-nums text-zinc-500 dark:text-zinc-400'>
+				{index}
+			</td>
 			<td className='px-4 py-3'>
 				<Link
 					href={`/dashboard/parkings/${park.id}`}

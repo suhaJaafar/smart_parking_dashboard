@@ -5,6 +5,7 @@ import { Pagination } from '@/app/components/pagination';
 import { UsersTable } from '@/app/dashboard/users/users-table';
 import { actionErrorMessage } from '@/app/lib/action-errors';
 import { getCurrentUser, requireAuth } from '@/app/lib/auth/dal';
+import { getPageStartIndex } from '@/app/lib/table-index';
 import { listUsers } from '@/app/lib/users/api';
 import { canManageUsers } from '@/app/lib/users/permissions';
 
@@ -60,7 +61,14 @@ export default async function UsersPage({ searchParams }: PageProps) {
 					No users yet.
 				</p>
 			) : (
-				<UsersTable users={res.data.data} currentUserId={user.id} />
+				<UsersTable
+					users={res.data.data}
+					currentUserId={user.id}
+					startIndex={getPageStartIndex(
+						res.data.meta.current_page,
+						res.data.meta.per_page,
+					)}
+				/>
 			)}
 
 			{res.ok ? (

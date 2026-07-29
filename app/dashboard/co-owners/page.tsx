@@ -5,6 +5,7 @@ import { CoOwnersTable } from '@/app/dashboard/co-owners/co-owners-table';
 import { getCurrentUser, requireAuth } from '@/app/lib/auth/dal';
 import { listCoOwnerRequests } from '@/app/lib/co-owners/api';
 import { canManageCoOwners } from '@/app/lib/co-owners/permissions';
+import { getPageStartIndex } from '@/app/lib/table-index';
 
 interface PageProps {
 	searchParams: Promise<{ page?: string; error?: string; ok?: string }>;
@@ -59,7 +60,13 @@ export default async function CoOwnersPage({ searchParams }: PageProps) {
 			) : res.data.data.length === 0 ? (
 				<EmptyState />
 			) : (
-				<CoOwnersTable requests={res.data.data} />
+				<CoOwnersTable
+					requests={res.data.data}
+					startIndex={getPageStartIndex(
+						res.data.meta.current_page,
+						res.data.meta.per_page,
+					)}
+				/>
 			)}
 
 			{res.ok ? (

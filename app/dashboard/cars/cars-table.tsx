@@ -8,12 +8,19 @@ import type { OwnerCar } from '@/app/types/car';
  * surfaces the plate, model, which garage the car sits in, the customer
  * contact, and edit / remove controls.
  */
-export function CarsTable({ cars }: { cars: readonly OwnerCar[] }) {
+export function CarsTable({
+	cars,
+	startIndex = 1,
+}: {
+	cars: readonly OwnerCar[];
+	startIndex?: number;
+}) {
 	return (
 		<div className='overflow-x-auto rounded-xl border border-black/[.06] bg-white dark:border-white/[.08] dark:bg-zinc-950'>
 			<table className='w-full text-sm'>
 				<thead className='bg-zinc-50 text-left text-xs uppercase tracking-wide text-zinc-500 dark:bg-zinc-900/60'>
 					<tr>
+						<th className='w-16 px-4 py-3 font-medium'>No.</th>
 						<th className='px-4 py-3 font-medium'>Plate</th>
 						<th className='px-4 py-3 font-medium'>Model</th>
 						<th className='px-4 py-3 font-medium'>Garage</th>
@@ -25,8 +32,8 @@ export function CarsTable({ cars }: { cars: readonly OwnerCar[] }) {
 					</tr>
 				</thead>
 				<tbody className='divide-y divide-zinc-100 dark:divide-zinc-800'>
-					{cars.map((car) => (
-						<Row key={car.id} car={car} />
+					{cars.map((car, rowIndex) => (
+						<Row key={car.id} car={car} index={startIndex + rowIndex} />
 					))}
 				</tbody>
 			</table>
@@ -34,11 +41,14 @@ export function CarsTable({ cars }: { cars: readonly OwnerCar[] }) {
 	);
 }
 
-function Row({ car }: { car: OwnerCar }) {
+function Row({ car, index }: { car: OwnerCar; index: number }) {
 	const phone = car.customer?.phone_number ?? null;
 
 	return (
 		<tr className='hover:bg-zinc-50/60 dark:hover:bg-zinc-900/40'>
+			<td className='px-4 py-3 text-sm tabular-nums text-zinc-500 dark:text-zinc-400'>
+				{index}
+			</td>
 			<td className='px-4 py-3'>
 				<span className='font-mono text-sm font-semibold tracking-wider text-zinc-900 dark:text-zinc-100'>
 					{car.plate || '—'}
