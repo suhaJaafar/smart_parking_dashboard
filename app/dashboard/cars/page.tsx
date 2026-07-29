@@ -11,6 +11,7 @@ import { getCurrentUser, requireAuth } from '@/app/lib/auth/dal';
 import { listOwnerCars, listOwnerParkCarHistory } from '@/app/lib/cars/api';
 import { canManageOwnerCars } from '@/app/lib/cars/permissions';
 import { listMyParks } from '@/app/lib/parks/api';
+import { getPageStartIndex } from '@/app/lib/table-index';
 
 interface PageProps {
 	searchParams: Promise<{
@@ -89,7 +90,13 @@ export default async function CarsPage({ searchParams }: PageProps) {
 			) : carsRes.data.data.length === 0 ? (
 				<EmptyState hasParks={parks.length > 0} />
 			) : (
-				<CarsTable cars={carsRes.data.data} />
+				<CarsTable
+					cars={carsRes.data.data}
+					startIndex={getPageStartIndex(
+						carsRes.data.meta.current_page,
+						carsRes.data.meta.per_page,
+					)}
+				/>
 			)}
 
 			{carsRes.ok ? (
@@ -116,7 +123,7 @@ export default async function CarsPage({ searchParams }: PageProps) {
 							enter.
 						</p>
 					</div>
-					<WaitingTable holds={waiting} />
+					<WaitingTable holds={waiting} startIndex={1} />
 				</section>
 			) : null}
 
@@ -147,7 +154,13 @@ export default async function CarsPage({ searchParams }: PageProps) {
 						{historyRes.error?.message ?? 'Failed to load history.'}
 					</p>
 				) : (
-					<CarHistoryTable rows={historyRes.data.data} />
+					<CarHistoryTable
+						rows={historyRes.data.data}
+						startIndex={getPageStartIndex(
+							historyRes.data.meta.current_page,
+							historyRes.data.meta.per_page,
+						)}
+					/>
 				)}
 
 				{historyRes.ok ? (

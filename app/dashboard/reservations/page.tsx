@@ -13,6 +13,7 @@ import { listMyParks } from '@/app/lib/parks/api';
 import { listOwnerReservations } from '@/app/lib/reservations/api';
 import { canManageOwnerReservations } from '@/app/lib/reservations/permissions';
 import { canViewAnyReservationStats } from '@/app/lib/reservation-stats/permissions';
+import { getPageStartIndex } from '@/app/lib/table-index';
 import Link from 'next/link';
 import type { ReservationFilter } from '@/app/types/reservation';
 
@@ -139,6 +140,10 @@ export default async function ReservationsPage({ searchParams }: PageProps) {
 				<ReservationsTable
 					reservations={reservationsRes.data.data}
 					redirectTo={buildRedirectTo(pageNumber, parkId, filter)}
+					startIndex={getPageStartIndex(
+						reservationsRes.data.meta.current_page,
+						reservationsRes.data.meta.per_page,
+					)}
 				/>
 			)}
 

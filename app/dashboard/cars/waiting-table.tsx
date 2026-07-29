@@ -6,12 +6,19 @@ import type { OwnerHold } from '@/app/types/car';
  * `free_spaces` only drops when the car actually enters — so this list simply
  * lets the owner see who is on the way.
  */
-export function WaitingTable({ holds }: { holds: readonly OwnerHold[] }) {
+export function WaitingTable({
+	holds,
+	startIndex = 1,
+}: {
+	holds: readonly OwnerHold[];
+	startIndex?: number;
+}) {
 	return (
 		<div className='overflow-x-auto rounded-xl border border-amber-200/70 bg-white dark:border-amber-900/40 dark:bg-zinc-950'>
 			<table className='w-full text-sm'>
 				<thead className='bg-amber-50 text-left text-xs uppercase tracking-wide text-amber-700 dark:bg-amber-950/30 dark:text-amber-300/80'>
 					<tr>
+						<th className='w-16 px-4 py-3 font-medium'>No.</th>
 						<th className='px-4 py-3 font-medium'>Code</th>
 						<th className='px-4 py-3 font-medium'>Plate</th>
 						<th className='px-4 py-3 font-medium'>Garage</th>
@@ -21,8 +28,8 @@ export function WaitingTable({ holds }: { holds: readonly OwnerHold[] }) {
 					</tr>
 				</thead>
 				<tbody className='divide-y divide-zinc-100 dark:divide-zinc-800'>
-					{holds.map((hold) => (
-						<Row key={hold.id} hold={hold} />
+					{holds.map((hold, rowIndex) => (
+						<Row key={hold.id} hold={hold} index={startIndex + rowIndex} />
 					))}
 				</tbody>
 			</table>
@@ -30,11 +37,14 @@ export function WaitingTable({ holds }: { holds: readonly OwnerHold[] }) {
 	);
 }
 
-function Row({ hold }: { hold: OwnerHold }) {
+function Row({ hold, index }: { hold: OwnerHold; index: number }) {
 	const phone = hold.customer?.phone_number ?? null;
 
 	return (
 		<tr className='hover:bg-amber-50/40 dark:hover:bg-amber-950/10'>
+			<td className='px-4 py-3 text-sm tabular-nums text-amber-700 dark:text-amber-300/80'>
+				{index}
+			</td>
 			<td className='px-4 py-3'>
 				{hold.booking_code ? (
 					<span className='inline-flex items-center rounded-md bg-amber-100 px-2 py-1 font-mono text-sm font-bold tracking-widest text-amber-900 dark:bg-amber-950/50 dark:text-amber-200'>

@@ -13,15 +13,18 @@ import type {
 export function ReservationsTable({
 	reservations,
 	redirectTo,
+	startIndex = 1,
 }: {
 	reservations: readonly OwnerReservation[];
 	redirectTo?: string;
+	startIndex?: number;
 }) {
 	return (
 		<div className='overflow-x-auto rounded-xl border border-black/[.06] bg-white dark:border-white/[.08] dark:bg-zinc-950'>
 			<table className='w-full text-sm'>
 				<thead className='bg-zinc-50 text-left text-xs uppercase tracking-wide text-zinc-500 dark:bg-zinc-900/40 dark:text-zinc-400'>
 					<tr>
+						<th className='w-16 px-4 py-3 font-medium'>No.</th>
 						<th className='px-4 py-3 font-medium'>Code</th>
 						<th className='px-4 py-3 font-medium'>Plate</th>
 						<th className='px-4 py-3 font-medium'>Garage</th>
@@ -33,8 +36,13 @@ export function ReservationsTable({
 					</tr>
 				</thead>
 				<tbody className='divide-y divide-zinc-100 dark:divide-zinc-800'>
-					{reservations.map((r) => (
-						<Row key={r.id} reservation={r} redirectTo={redirectTo} />
+					{reservations.map((r, rowIndex) => (
+						<Row
+							key={r.id}
+							reservation={r}
+							redirectTo={redirectTo}
+							index={startIndex + rowIndex}
+						/>
 					))}
 				</tbody>
 			</table>
@@ -45,15 +53,20 @@ export function ReservationsTable({
 function Row({
 	reservation,
 	redirectTo,
+	index,
 }: {
 	reservation: OwnerReservation;
 	redirectTo?: string;
+	index: number;
 }) {
 	const phone = reservation.customer?.phone_number ?? null;
 	const plate = reservation.car?.plate ?? null;
 
 	return (
 		<tr className='hover:bg-zinc-50/60 dark:hover:bg-zinc-900/30'>
+			<td className='px-4 py-3 text-sm tabular-nums text-zinc-500 dark:text-zinc-400'>
+				{index}
+			</td>
 			<td className='px-4 py-3'>
 				{reservation.booking_code ? (
 					<span className='inline-flex items-center rounded-md bg-amber-100 px-2 py-1 font-mono text-sm font-bold tracking-widest text-amber-900 dark:bg-amber-950/50 dark:text-amber-200'>
