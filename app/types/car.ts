@@ -105,3 +105,38 @@ export interface OwnerHold {
 export interface OwnerCarsPage extends Paginated<OwnerCar> {
 	waiting: OwnerHold[];
 }
+
+/**
+ * A historical parking session — a car that entered one of the owner's
+ * garages and has since left. Sourced from COMPLETED reservations
+ * (`GET /api/owner/park-cars/history`, backed by `ParkCarHistoryResource`).
+ * This is the audit trail, distinct from the currently-parked cars.
+ */
+export interface ParkCarHistory {
+	id: string;
+	booking_code: string | null;
+	is_pre_booking: boolean;
+	park?: {
+		id: string;
+		name: string;
+	};
+	customer?: {
+		id: string;
+		name: string;
+		phone_number: string | null;
+	};
+	car: {
+		id: string;
+		plate_prefix: string | null;
+		car_number: string;
+		plate: string;
+		model: string | null;
+	} | null;
+	/** When the car entered (reservation created_at). */
+	entered_at: string | null;
+	/** When the car left (reservation marked completed). */
+	exited_at: string | null;
+	duration_minutes: number | null;
+}
+
+export type ParkCarHistoryPage = Paginated<ParkCarHistory>;

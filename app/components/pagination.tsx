@@ -8,15 +8,25 @@ import Link from 'next/link';
  *
  *   <Pagination current={meta.current_page} last={meta.last_page}
  *               basePath='/dashboard/parkings' />
+ *
+ * Pass `params` to preserve the active filters (garage, status, date range…)
+ * across page changes — without it, navigating to page 2 would drop those
+ * filters and silently show a different (often empty) slice. Pass `pageParam`
+ * when a route hosts more than one independent paginated list (e.g. the cars
+ * page paginates both the current cars and the history).
  */
 export function Pagination({
 	current,
 	last,
 	basePath,
+	params,
+	pageParam = 'page',
 }: {
 	current: number;
 	last: number;
 	basePath: string;
+	params?: Record<string, string | undefined>;
+	pageParam?: string;
 }) {
 	if (last <= 1) return null;
 	return (
@@ -26,6 +36,8 @@ export function Pagination({
 				page={current - 1}
 				disabled={current <= 1}
 				label='Previous'
+				params={params}
+				pageParam={pageParam}
 			/>
 			<span className='text-zinc-500'>
 				Page {current} of {last}
@@ -35,6 +47,8 @@ export function Pagination({
 				page={current + 1}
 				disabled={current >= last}
 				label='Next'
+				params={params}
+				pageParam={pageParam}
 			/>
 		</nav>
 	);
@@ -45,11 +59,15 @@ function PageLink({
 	page,
 	disabled,
 	label,
+	params,
+	pageParam,
 }: {
 	basePath: string;
 	page: number;
 	disabled: boolean;
 	label: string;
+	params?: Record<string, string | undefined>;
+	pageParam: string;
 }) {
 	if (disabled) {
 		return (
@@ -58,9 +76,18 @@ function PageLink({
 			</span>
 		);
 	}
+
+	const search = new URLSearchParams();
+	if (params) {
+		for (const [key, value] of Object.entries(params)) {
+			if (value !== undefined && value !== '') search.set(key, value);
+		}
+	}
+	search.set(pageParam, String(page));
+
 	return (
 		<Link
-			href={`${basePath}?page=${page}`}
+			href={`${basePath}?${search.toString()}`}
 			className='rounded-md border border-zinc-300 px-3 py-1 hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-900'
 		>
 			{label}

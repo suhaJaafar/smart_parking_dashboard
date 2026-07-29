@@ -1,18 +1,21 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
+import { ExportMenu } from '@/app/components/export-menu';
 import { Pagination } from '@/app/components/pagination';
+import { CarHistoryTable } from '@/app/dashboard/cars/car-history-table';
 import { CarsTable } from '@/app/dashboard/cars/cars-table';
 import { ParkFilter, type ParkOption } from '@/app/dashboard/cars/park-filter';
 import { WaitingTable } from '@/app/dashboard/cars/waiting-table';
 import { getCurrentUser, requireAuth } from '@/app/lib/auth/dal';
-import { listOwnerCars } from '@/app/lib/cars/api';
+import { listOwnerCars, listOwnerParkCarHistory } from '@/app/lib/cars/api';
 import { canManageOwnerCars } from '@/app/lib/cars/permissions';
 import { listMyParks } from '@/app/lib/parks/api';
 
 interface PageProps {
 	searchParams: Promise<{
 		page?: string;
+		hpage?: string;
 		park_id?: string;
 		error?: string;
 		ok?: string;
@@ -33,12 +36,14 @@ export default async function CarsPage({ searchParams }: PageProps) {
 	const user = (await getCurrentUser())!;
 	if (!canManageOwnerCars(user)) redirect('/dashboard');
 
-	const { page, park_id: parkId, error, ok } = await searchParams;
+	const { page, hpage, park_id: parkId, error, ok } = await searchParams;
 	const pageNumber = Math.max(1, Number(page) || 1);
+	const historyPage = Math.max(1, Number(hpage) || 1);
 
-	const [carsRes, parks] = await Promise.all([
+	const [carsRes, parks, historyRes] = await Promise.all([
 		listOwnerCars({ page: pageNumber, parkId }),
 		loadParkOptions(),
+		listOwnerParkCarHistory({ page: historyPage, parkId }),
 	]);
 
 	const waiting = carsRes.ok ? carsRes.data.waiting : [];
@@ -92,6 +97,7 @@ export default async function CarsPage({ searchParams }: PageProps) {
 					current={carsRes.data.meta.current_page}
 					last={carsRes.data.meta.last_page}
 					basePath={BASE_PATH}
+					params={{ park_id: parkId }}
 				/>
 			) : null}
 
@@ -113,6 +119,47 @@ export default async function CarsPage({ searchParams }: PageProps) {
 					<WaitingTable holds={waiting} />
 				</section>
 			) : null}
+
+			<section className='space-y-3 pt-2'>
+				<div className='flex flex-wrap items-start justify-between gap-3'>
+					<div>
+						<h2 className='flex items-center gap-2 text-lg font-semibold tracking-tight'>
+							Entered before
+							{historyRes.ok ? (
+								<span className='inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-zinc-100 px-1.5 text-xs font-semibold text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300'>
+									{historyRes.data.meta.total}
+								</span>
+							) : null}
+						</h2>
+						<p className='text-sm text-zinc-600 dark:text-zinc-400'>
+							Every car that has entered this garage and left — the full
+							history, with owner, contact and how long they stayed.
+						</p>
+					</div>
+					<ExportMenu
+						endpoint='/api/exports/park-cars'
+						extraParams={{ park_id: parkId }}
+					/>
+				</div>
+
+				{!historyRes.ok ? (
+					<p className='rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300'>
+						{historyRes.error?.message ?? 'Failed to load history.'}
+					</p>
+				) : (
+					<CarHistoryTable rows={historyRes.data.data} />
+				)}
+
+				{historyRes.ok ? (
+					<Pagination
+						current={historyRes.data.meta.current_page}
+						last={historyRes.data.meta.last_page}
+						basePath={BASE_PATH}
+						pageParam='hpage'
+						params={{ park_id: parkId }}
+					/>
+				) : null}
+			</section>
 		</div>
 	);
 }

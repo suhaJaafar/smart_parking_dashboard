@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
 
+import { ExportMenu } from '@/app/components/export-menu';
 import { Pagination } from '@/app/components/pagination';
 import { ReservationFilterTabs } from '@/app/dashboard/reservations/reservation-filter-tabs';
 import {
@@ -62,7 +63,7 @@ export default async function ReservationsPage({ searchParams }: PageProps) {
 		rawFilter as ReservationFilter,
 	)
 		? (rawFilter as ReservationFilter)
-		: 'live';
+		: 'all';
 
 	const [reservationsRes, parks] = await Promise.all([
 		listOwnerReservations({ page: pageNumber, parkId, filter }),
@@ -83,13 +84,30 @@ export default async function ReservationsPage({ searchParams }: PageProps) {
 					</p>
 				</div>
 				{canViewAnyReservationStats(user) ? (
-					<Link
-						href='/dashboard/reservations/stats'
-						className='inline-flex h-9 items-center rounded-md border border-zinc-300 px-3 text-sm font-medium hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-900'
-					>
-						View analytics
-					</Link>
-				) : null}
+					<div className='flex items-center gap-2'>
+						<ExportMenu
+							endpoint='/api/exports/reservations'
+							extraParams={{
+								park_id: parkId,
+								filter: filter !== 'all' ? filter : undefined,
+							}}
+						/>
+						<Link
+							href='/dashboard/reservations/stats'
+							className='inline-flex h-9 items-center rounded-md border border-zinc-300 px-3 text-sm font-medium hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-900'
+						>
+							View analytics
+						</Link>
+					</div>
+				) : (
+					<ExportMenu
+						endpoint='/api/exports/reservations'
+						extraParams={{
+							park_id: parkId,
+							filter: filter !== 'all' ? filter : undefined,
+						}}
+					/>
+				)}
 			</div>
 
 			{ok ? (
@@ -129,6 +147,10 @@ export default async function ReservationsPage({ searchParams }: PageProps) {
 					basePath={BASE_PATH}
 					current={reservationsRes.data.meta.current_page}
 					last={reservationsRes.data.meta.last_page}
+					params={{
+						park_id: parkId,
+						filter: filter !== 'all' ? filter : undefined,
+					}}
 				/>
 			) : null}
 		</div>
@@ -192,7 +214,7 @@ function buildRedirectTo(
 	const params = new URLSearchParams();
 	if (page > 1) params.set('page', String(page));
 	if (parkId) params.set('park_id', parkId);
-	if (filter !== 'live') params.set('filter', filter);
+	if (filter !== 'all') params.set('filter', filter);
 	const qs = params.toString();
 	return qs ? `${BASE_PATH}?${qs}` : BASE_PATH;
 }
