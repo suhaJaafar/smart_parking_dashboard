@@ -7,6 +7,7 @@ import type {
 	CreateOwnerCarPayload,
 	OwnerCar,
 	OwnerCarsPage,
+	ParkCarHistoryPage,
 	UpdateOwnerCarPayload,
 } from '@/app/types/car';
 
@@ -56,4 +57,27 @@ export function updateOwnerCar(
 
 export function deleteOwnerCar(id: string): Promise<ApiResult<null>> {
 	return api.delete<null>(endpoints.owner.cars.remove(id));
+}
+
+/**
+ * Page through the historical parking sessions — cars that entered one of the
+ * owner's garages and have since left. Optionally scoped to a single garage
+ * and a date window. This is the audit trail, NOT the currently-parked cars.
+ */
+export function listOwnerParkCarHistory(
+	options: {
+		page?: number;
+		parkId?: string;
+		from?: string;
+		to?: string;
+	} = {},
+): Promise<ApiResult<ParkCarHistoryPage>> {
+	const { page = 1, parkId, from, to } = options;
+	const qs = new URLSearchParams({ page: String(page) });
+	if (parkId) qs.set('park_id', parkId);
+	if (from) qs.set('from', from);
+	if (to) qs.set('to', to);
+	return api.get<ParkCarHistoryPage>(
+		`${endpoints.owner.cars.history}?${qs.toString()}`,
+	);
 }

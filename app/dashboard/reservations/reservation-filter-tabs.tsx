@@ -43,7 +43,7 @@ export function ReservationFilterTabs({
 
 	function navigate(next: ReservationFilter) {
 		const params = new URLSearchParams(searchParams.toString());
-		if (next === 'live') params.delete('filter');
+		if (next === 'all') params.delete('filter');
 		else params.set('filter', next);
 		params.delete('page');
 		const qs = params.toString();

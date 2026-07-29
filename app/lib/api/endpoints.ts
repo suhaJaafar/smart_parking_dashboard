@@ -49,7 +49,9 @@ export const endpoints = {
 			detail: (id: string | number) => `/api/owner/cars/${id}`,
 			update: (id: string | number) => `/api/owner/cars/${id}`,
 			remove: (id: string | number) => `/api/owner/cars/${id}`,
+			history: '/api/owner/park-cars/history',
 		},
+		parkUsers: '/api/owner/park-users',
 		reservations: {
 			list: '/api/owner/reservations',
 			detail: (id: string | number) => `/api/owner/reservations/${id}`,
