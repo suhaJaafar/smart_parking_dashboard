@@ -32,6 +32,8 @@ export function ExportMenu({
 
 	function download() {
 		const params = new URLSearchParams();
+		// Cache-buster so repeated exports always hit the latest server response.
+		params.set('_ts', String(Date.now()));
 		if (extraParams) {
 			for (const [key, value] of Object.entries(extraParams)) {
 				if (value !== undefined && value !== '') params.set(key, value);
