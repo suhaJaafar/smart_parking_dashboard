@@ -10,6 +10,9 @@ export interface ParkOwner {
 	email: string;
 }
 
+/** Review state of a garage. Authoritative — never re-derived client-side. */
+export type ParkApprovalStatus = 'pending' | 'approved' | 'rejected';
+
 /** Park entity as returned by `ParkResource`. */
 export interface Park {
 	id: string;
@@ -17,6 +20,13 @@ export interface Park {
 	user_id: string;
 	capacity: number;
 	free_spaces: number;
+	/** Flat per-stay fee, as a decimal string (e.g. "5000.000"). */
+	price?: string | null;
+	approval_status: ParkApprovalStatus;
+	/** Derived by the backend so no client re-encodes which state is live. */
+	is_approved: boolean;
+	approved_at?: string | null;
+	rejection_reason?: string | null;
 	/** Eager-loaded by the backend on `show`/`store`/`update`. */
 	location?: Location | null;
 	/** Eager-loaded for admin views (`index`/`show`). */
@@ -33,6 +43,8 @@ export interface CreateParkPayload {
 	name: string;
 	capacity: number;
 	free_spaces?: number;
+	/** Flat per-stay fee. Omitted → backend default. */
+	price?: number;
 	user_id?: string;
 	// location fields
 	country: Country;

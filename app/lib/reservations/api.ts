@@ -64,6 +64,21 @@ export function cancelOwnerReservation(
 }
 
 /**
+ * Admit an arriving customer: parks their car (claiming the slot) and flips
+ * the hold START → ACTIVE, mirroring the bot's `CarEntryFlow`. A plate is
+ * only required when the customer has no vehicle on file.
+ */
+export function admitOwnerReservation(
+	id: string,
+	plate?: { plate_prefix: string; car_number: string },
+): Promise<ApiResult<{ message: string; data: OwnerReservation }>> {
+	return api.post<{ message: string; data: OwnerReservation }>(
+		endpoints.owner.reservations.admit(id),
+		plate ?? {},
+	);
+}
+
+/**
  * Mark an ACTIVE reservation as completed, exactly like driving the car out
  * from the bot: `CarService::exitPark` frees the slot and nulls
  * `car.park_id`, then `ReservationService::markCompleted` flips the row to

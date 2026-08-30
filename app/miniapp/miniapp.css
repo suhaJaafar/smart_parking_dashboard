@@ -1,0 +1,476 @@
+/**
+ * Mini App design system.
+ *
+ * Tailwind itself is loaded once by the root layout's `globals.css`; importing
+ * it again here would duplicate the entire utility layer in the bundle. This
+ * file therefore contributes only tokens, keyframes, and component classes,
+ * and components reference the palette through `var(--sp-*)` arbitrary values.
+ *
+ * The palette is deliberately indirect: every colour resolves to a `--sp-*`
+ * variable that `applyTelegramTheme()` overwrites at runtime with the user's
+ * actual Telegram colours. The values below are only the fallback that renders
+ * before the SDK reports in (and in a plain browser, where it never does), so
+ * the app is always legible and never flashes unstyled.
+ */
+
+:root {
+	/**
+	 * Brand ramp — fixed. Unlike the neutrals below these are never replaced by
+	 * the user's Telegram theme, so the app keeps one identity on every client.
+	 *
+	 * 50/200/300/500 are the source palette. 600–900 are derived in the same
+	 * hue because the source stops at a mid-tone that no text passes AA on.
+	 *
+	 * Measured contrast, white text / #14180d text:
+	 *   200  1.53 / 11.73    300  2.45 / 7.35    500  3.10 / 5.81
+	 *   600  4.49 /  4.01    700  6.00 / 3.00
+	 * The app pairs fills with WHITE by brand decision, so 500 is the lightest
+	 * fill that stays usable; 200/300 must never sit behind white text.
+	 */
+	--sp-brand-50: #f6f0d7;
+	--sp-brand-200: #c5d89d;
+	--sp-brand-300: #9cab84;
+	--sp-brand-500: #89986d;
+	--sp-brand-600: #6e7c56;
+	--sp-brand-700: #5a6845;
+	--sp-brand-900: #14180d;
+
+	/**
+	 * Accent *roles*, so components ask for a job rather than a colour:
+	 *   accent        solid fills — pairs with accent-text
+	 *   accent-strong accent-coloured text/icons on a light surface (6.0:1);
+	 *                 using accent here instead would fail AA
+	 *   accent-soft   large tinted washes
+	 *
+	 * White on brand-500 is 3.10:1 — a deliberate brand choice, valid for large
+	 * text (>=18.7px bold) but under AA for body copy. Keep accent fills to
+	 * buttons and chips with short, bold labels; never small print.
+	 */
+	--sp-accent: var(--sp-brand-500);
+	--sp-accent-text: #ffffff;
+	--sp-accent-strong: var(--sp-brand-700);
+	--sp-accent-soft: var(--sp-brand-50);
+
+	/* Fallback neutrals — overwritten by applyTelegramTheme(). Warmed slightly
+	   so the pre-SDK paint already belongs to the brand. */
+	--sp-bg: #ffffff;
+	--sp-surface: #faf9f4;
+	--sp-surface-alt: #f1efe4;
+	--sp-text: #14180d;
+	--sp-muted: #7b8172;
+	--sp-link: var(--sp-accent-strong);
+	--sp-danger: #e5484d;
+
+	/* Safe-area insets — replaced by applySafeAreaInsets() on Bot API 8+. */
+	--sp-safe-top: 0px;
+	--sp-safe-bottom: 0px;
+	--sp-safe-left: 0px;
+	--sp-safe-right: 0px;
+
+	/* Motion. A single easing curve keeps every transition feeling related. */
+	--sp-ease: cubic-bezier(0.22, 1, 0.36, 1);
+	--sp-duration: 420ms;
+}
+
+:root[data-tg-theme='dark'] {
+	--sp-bg: #17212b;
+	--sp-surface: #1d2733;
+	--sp-surface-alt: #242f3d;
+	--sp-text: #f5f7fa;
+	--sp-muted: #8b98a5;
+
+	/* The fill stays brand-500 in dark so white keeps the same 3.10:1 it has in
+	   light; brand-200 here would drop white to 1.53:1. Accent *text* on the
+	   dark background still steps up the ramp, where it needs the luminance. */
+	--sp-accent: var(--sp-brand-500);
+	--sp-accent-text: #ffffff;
+	--sp-accent-strong: var(--sp-brand-200);
+	--sp-accent-soft: color-mix(in srgb, var(--sp-brand-200) 14%, transparent);
+}
+
+html,
+body {
+	background: var(--sp-bg);
+	color: var(--sp-text);
+}
+
+body {
+	/* Telegram's WebView keeps native momentum scrolling; overscroll bounce on
+	   the body fights the swipe-to-close gesture, so it is pinned. */
+	overscroll-behavior-y: none;
+	-webkit-tap-highlight-color: transparent;
+}
+
+/* ----------------------------- Animations ------------------------------- */
+
+@keyframes sp-fade-up {
+	from {
+		opacity: 0;
+		transform: translate3d(0, 14px, 0);
+	}
+	to {
+		opacity: 1;
+		transform: translate3d(0, 0, 0);
+	}
+}
+
+@keyframes sp-scale-in {
+	from {
+		opacity: 0;
+		transform: scale(0.94);
+	}
+	to {
+		opacity: 1;
+		transform: scale(1);
+	}
+}
+
+@keyframes sp-shimmer {
+	from {
+		background-position: -200% 0;
+	}
+	to {
+		background-position: 200% 0;
+	}
+}
+
+@keyframes sp-spin {
+	to {
+		transform: rotate(360deg);
+	}
+}
+
+@keyframes sp-pulse-ring {
+	0% {
+		opacity: 0.55;
+		transform: scale(0.85);
+	}
+	70% {
+		opacity: 0;
+		transform: scale(1.6);
+	}
+	100% {
+		opacity: 0;
+		transform: scale(1.6);
+	}
+}
+
+.sp-animate-in {
+	animation: sp-fade-up var(--sp-duration) var(--sp-ease) both;
+}
+
+.sp-animate-scale {
+	animation: sp-scale-in 320ms var(--sp-ease) both;
+}
+
+/**
+ * Stagger helper. Children of a `.sp-stagger` container cascade in sequence,
+ * which reads as "the list is arriving" rather than "everything blinked".
+ */
+.sp-stagger > * {
+	animation: sp-fade-up var(--sp-duration) var(--sp-ease) both;
+}
+.sp-stagger > *:nth-child(1) {
+	animation-delay: 40ms;
+}
+.sp-stagger > *:nth-child(2) {
+	animation-delay: 90ms;
+}
+.sp-stagger > *:nth-child(3) {
+	animation-delay: 140ms;
+}
+.sp-stagger > *:nth-child(4) {
+	animation-delay: 190ms;
+}
+.sp-stagger > *:nth-child(5) {
+	animation-delay: 240ms;
+}
+.sp-stagger > *:nth-child(6) {
+	animation-delay: 290ms;
+}
+.sp-stagger > *:nth-child(n + 7) {
+	animation-delay: 330ms;
+}
+
+.sp-spin {
+	animation: sp-spin 700ms linear infinite;
+}
+
+.sp-pulse-ring {
+	animation: sp-pulse-ring 1.8s var(--sp-ease) infinite;
+}
+
+/** Loading placeholder that matches the live theme instead of a grey block. */
+.sp-skeleton {
+	background-image: linear-gradient(
+		90deg,
+		var(--sp-surface) 25%,
+		var(--sp-surface-alt) 37%,
+		var(--sp-surface) 63%
+	);
+	background-size: 200% 100%;
+	animation: sp-shimmer 1.4s ease-in-out infinite;
+}
+
+/**
+ * Press affordance. Telegram users expect a physical response to touch; the
+ * scale-down lands with the haptic tick fired from the click handler.
+ */
+.sp-pressable {
+	transition:
+		transform 160ms var(--sp-ease),
+		background-color 160ms var(--sp-ease),
+		opacity 160ms var(--sp-ease);
+}
+.sp-pressable:active {
+	transform: scale(0.97);
+}
+
+/* Respect the user's motion preference — animation is never load-bearing. */
+@media (prefers-reduced-motion: reduce) {
+	.sp-animate-in,
+	.sp-animate-scale,
+	.sp-stagger > *,
+	.sp-skeleton,
+	.sp-spin,
+	.sp-pulse-ring {
+		animation: none !important;
+	}
+	.sp-pressable {
+		transition: none;
+	}
+}
+
+/* ---------------------------- Components -------------------------------- */
+
+/**
+ * The surface every panel sits on. A hairline border rather than a shadow:
+ * Telegram's own UI is flat, and drop shadows read as foreign inside it.
+ */
+.sp-card {
+	background: var(--sp-surface);
+	border: 1px solid color-mix(in srgb, var(--sp-text) 8%, transparent);
+	border-radius: 1rem;
+}
+
+.sp-divider {
+	border-color: color-mix(in srgb, var(--sp-text) 8%, transparent);
+}
+
+/** Primary action. Brand fill with white label. */
+.sp-button {
+	background: var(--sp-accent);
+	color: var(--sp-accent-text);
+	border-radius: 0.875rem;
+	font-weight: 600;
+	transition:
+		transform 160ms var(--sp-ease),
+		filter 160ms var(--sp-ease);
+}
+.sp-button:active {
+	transform: scale(0.97);
+	filter: brightness(0.94);
+}
+.sp-button:disabled {
+	opacity: 0.5;
+	transform: none;
+	filter: none;
+}
+
+/** Quiet, secondary action. */
+.sp-button-ghost {
+	background: color-mix(in srgb, var(--sp-text) 6%, transparent);
+	color: var(--sp-text);
+	border-radius: 0.875rem;
+	font-weight: 600;
+	transition: transform 160ms var(--sp-ease);
+}
+.sp-button-ghost:active {
+	transform: scale(0.97);
+}
+
+/** Form control that inherits the live Telegram palette. */
+.sp-input {
+	width: 100%;
+	background: var(--sp-surface);
+	border: 1px solid color-mix(in srgb, var(--sp-text) 12%, transparent);
+	border-radius: 0.875rem;
+	padding: 0.75rem 0.875rem;
+	font-size: 1rem;
+	color: var(--sp-text);
+	outline: none;
+	transition: border-color 160ms var(--sp-ease);
+}
+.sp-input:focus {
+	border-color: var(--sp-accent);
+}
+/* Native selects ignore `color` on iOS unless the option is styled too. */
+.sp-input option {
+	color: #000;
+}
+
+/* -------------------------------- Map ----------------------------------- */
+
+/**
+ * Leaflet ships its own light chrome, which looks foreign inside Telegram.
+ * Everything below re-skins it onto the same tokens the rest of the app uses,
+ * so the map inherits dark mode and the brand colour for free.
+ */
+.sp-map-shell {
+	position: relative;
+	overflow: hidden;
+	border-radius: 1.25rem;
+	border: 1px solid color-mix(in srgb, var(--sp-text) 8%, transparent);
+	background: var(--sp-surface);
+}
+
+.sp-map-shell .leaflet-container {
+	background: var(--sp-surface);
+	font: inherit;
+	/* Leaflet assumes LTR for control offsets; the app is RTL. */
+	direction: ltr;
+}
+
+/* Raster tiles are daylight-bright; damp them down in dark mode so the
+   markers stay the lightest thing on screen. */
+:root[data-tg-theme='dark'] .sp-map-shell .leaflet-tile-pane {
+	filter: brightness(0.72) saturate(0.85) contrast(1.05);
+}
+
+.sp-map-shell .leaflet-control-zoom {
+	border: none;
+	box-shadow: 0 4px 16px rgb(0 0 0 / 12%);
+}
+
+.sp-map-shell .leaflet-control-zoom a {
+	width: 34px;
+	height: 34px;
+	line-height: 34px;
+	background: var(--sp-bg);
+	color: var(--sp-text);
+	border-color: color-mix(in srgb, var(--sp-text) 10%, transparent);
+	font-weight: 600;
+}
+
+.sp-map-shell .leaflet-control-zoom a:hover {
+	background: var(--sp-surface-alt);
+}
+
+/* Markers are absolutely positioned by Leaflet at a zero-size anchor, so each
+   one centres itself on its own coordinate. */
+.sp-map-marker {
+	background: none;
+	border: none;
+}
+
+.sp-pin {
+	position: absolute;
+	left: 0;
+	top: 0;
+	transform: translate(-50%, -50%);
+	display: flex;
+	align-items: center;
+	gap: 0.375rem;
+	padding: 0.25rem 0.5rem 0.25rem 0.25rem;
+	border-radius: 999px;
+	background: var(--sp-bg);
+	border: 1px solid color-mix(in srgb, var(--sp-text) 10%, transparent);
+	box-shadow: 0 3px 10px rgb(0 0 0 / 14%);
+	white-space: nowrap;
+	cursor: pointer;
+	transition:
+		transform 200ms var(--sp-ease),
+		box-shadow 200ms var(--sp-ease),
+		background-color 200ms var(--sp-ease);
+}
+
+.sp-pin-badge {
+	display: grid;
+	place-items: center;
+	min-width: 1.5rem;
+	height: 1.5rem;
+	padding: 0 0.25rem;
+	border-radius: 999px;
+	background: var(--sp-accent);
+	color: var(--sp-accent-text);
+	font-size: 0.75rem;
+	font-weight: 700;
+	font-variant-numeric: tabular-nums;
+}
+
+.sp-pin.is-full .sp-pin-badge {
+	background: var(--sp-danger);
+	color: #fff;
+}
+
+.sp-pin-label {
+	max-width: 8.5rem;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	font-size: 0.75rem;
+	font-weight: 600;
+	color: var(--sp-text);
+}
+
+.sp-pin.is-selected {
+	background: var(--sp-accent);
+	border-color: var(--sp-accent);
+	transform: translate(-50%, -50%) scale(1.08);
+	box-shadow: 0 6px 18px color-mix(in srgb, var(--sp-accent) 45%, transparent);
+	z-index: 1;
+}
+
+.sp-pin.is-selected .sp-pin-label {
+	color: var(--sp-accent-text);
+}
+
+.sp-pin.is-selected .sp-pin-badge {
+	background: var(--sp-accent-text);
+	color: var(--sp-accent);
+}
+
+/* "You are here" — a pulsing dot rather than a pin, so it never competes
+   with the garages the user is actually choosing between. */
+.sp-origin {
+	position: absolute;
+	left: 0;
+	top: 0;
+	transform: translate(-50%, -50%);
+	width: 1rem;
+	height: 1rem;
+}
+
+.sp-origin-dot,
+.sp-origin-pulse {
+	position: absolute;
+	inset: 0;
+	border-radius: 999px;
+}
+
+.sp-origin-dot {
+	background: #2f81f7;
+	border: 2px solid #fff;
+	box-shadow: 0 1px 5px rgb(0 0 0 / 30%);
+}
+
+.sp-origin-pulse {
+	background: #2f81f7;
+	animation: sp-pulse-ring 2s var(--sp-ease) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.sp-origin-pulse {
+		animation: none;
+		opacity: 0.25;
+	}
+	.sp-pin {
+		transition: none;
+	}
+}
+
+/* Route hint. Set via className, not pathOptions.color: var() does not
+   resolve inside an SVG stroke presentation attribute. */
+.sp-route {
+	stroke: var(--sp-accent);
+	opacity: 0.85;
+}

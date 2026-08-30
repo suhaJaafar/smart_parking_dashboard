@@ -66,6 +66,7 @@ export interface OwnerReservation {
 	expires_at: string | null;
 	created_at: string | null;
 	updated_at: string | null;
+	can_admit: boolean;
 	can_cancel: boolean;
 	can_exit_car: boolean;
 }
