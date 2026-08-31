@@ -14,6 +14,7 @@ export const CREATE_PARK_FIELDS = formFields<CreateParkPayload>()([
 	'name',
 	'capacity',
 	'free_spaces',
+	'price',
 	'user_id',
 	'country',
 	'state',

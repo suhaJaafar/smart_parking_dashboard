@@ -13,6 +13,10 @@ export const endpoints = {
 		whatsappRequestCode: '/api/auth/whatsapp/request-code',
 		whatsappVerifyCode: '/api/auth/whatsapp/verify-code',
 		telegramVerifyCode: '/api/auth/telegram/verify-code',
+		/** Exchange Telegram-signed Mini App `initData` for a JWT. */
+		telegramMiniApp: '/api/auth/telegram/miniapp',
+		/** Switch between driver and garage owner (roles are exclusive). */
+		switchRole: '/api/miniapp/role',
 	},
 	users: {
 		list: '/api/users',
@@ -30,10 +34,24 @@ export const endpoints = {
 	},
 	customer: {
 		nearbyParks: '/api/customer/parks/nearby',
+		reservations: {
+			create: '/api/customer/reservations',
+			/** Settled bookings — the complement of `active`. Paginated. */
+			history: '/api/customer/reservations',
+			active: '/api/customer/reservations/active',
+			cancel: (id: string | number) =>
+				`/api/customer/reservations/${id}/cancel`,
+		},
 	},
 	admin: {
 		stats: '/api/admin/stats',
 		reservationStats: '/api/admin/reservation-stats',
+		/** Review queue for newly registered garages. */
+		parkApprovals: '/api/admin/park-approvals',
+		approvePark: (id: string | number) =>
+			`/api/admin/park-approvals/${id}/approve`,
+		rejectPark: (id: string | number) =>
+			`/api/admin/park-approvals/${id}/reject`,
 	},
 	owner: {
 		stats: '/api/owner/stats',
@@ -55,6 +73,7 @@ export const endpoints = {
 		reservations: {
 			list: '/api/owner/reservations',
 			detail: (id: string | number) => `/api/owner/reservations/${id}`,
+			admit: (id: string | number) => `/api/owner/reservations/${id}/admit`,
 			cancel: (id: string | number) => `/api/owner/reservations/${id}/cancel`,
 			exit: (id: string | number) => `/api/owner/reservations/${id}/exit`,
 		},
