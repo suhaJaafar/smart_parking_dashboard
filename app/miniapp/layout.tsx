@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import Script from 'next/script';
 
-import { getSessionToken } from '@/app/lib/auth/session';
+import { getCurrentUser } from '@/app/lib/auth/dal';
 import { MiniAppProvider } from './miniapp-provider';
 import { MiniAppGate } from './miniapp-gate';
 
@@ -41,7 +41,16 @@ export default async function MiniAppLayout({
 }: {
 	children: React.ReactNode;
 }) {
-	const hasServerSession = (await getSessionToken()) !== null;
+	/*
+	 * Resolve the user, not just the cookie. The provider skips the Telegram
+	 * auth exchange entirely when this is true, so a stale or expired token
+	 * would strand the user: no exchange runs, `/api/user` then fails, and the
+	 * home page falls through to "account incomplete". Asking who the token
+	 * belongs to makes a dead cookie behave like no cookie at all.
+	 *
+	 * `getCurrentUser` is request-cached, so the page's own call is free.
+	 */
+	const hasServerSession = (await getCurrentUser()) !== null;
 
 	return (
 		<>
