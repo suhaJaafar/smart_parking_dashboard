@@ -9,6 +9,7 @@ import {
 } from '@/app/lib/miniapp/actions';
 import {
 	directionsUrl,
+	wazeDirectionsUrl,
 	type NavigationApp,
 } from '@/app/lib/miniapp/directions';
 import {
@@ -136,6 +137,19 @@ export function NearbyClient() {
 				}
 
 				hapticNotification('success');
+
+				// The booking is made — get the driver moving immediately rather
+				// than making them find the "الاتجاهات" button themselves. Waze
+				// (not a chooser) because it always routes from the live GPS fix,
+				// which is exactly right the moment someone starts driving.
+				if (park.latitude != null && park.longitude != null) {
+					openExternalLink(
+						wazeDirectionsUrl({
+							latitude: park.latitude,
+							longitude: park.longitude,
+						}),
+					);
+				}
 
 				// Release Telegram's button *before* navigating. Its spinner is
 				// driven by the transition, and the transition stays pending
