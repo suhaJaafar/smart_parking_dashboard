@@ -19,6 +19,7 @@ import {
 } from '@/app/lib/miniapp/format';
 import { resolvePosition } from '@/app/lib/miniapp/location';
 import {
+	confirmAction,
 	getWebApp,
 	hapticImpact,
 	hapticNotification,
@@ -138,17 +139,21 @@ export function NearbyClient() {
 
 				hapticNotification('success');
 
-				// The booking is made — get the driver moving immediately rather
-				// than making them find the "الاتجاهات" button themselves. Waze
-				// (not a chooser) because it always routes from the live GPS fix,
-				// which is exactly right the moment someone starts driving.
+				// Ask before handing off — don't hijack the driver into Waze
+				// without a choice, only offer it (Waze always routes from the
+				// live GPS fix, so no chooser is needed once they say yes).
 				if (park.latitude != null && park.longitude != null) {
-					openExternalLink(
-						wazeDirectionsUrl({
-							latitude: park.latitude,
-							longitude: park.longitude,
-						}),
+					const wantsDirections = await confirmAction(
+						'تم الحجز بنجاح. هل تريد فتح Waze للتوجه إلى الموقف؟',
 					);
+					if (wantsDirections) {
+						openExternalLink(
+							wazeDirectionsUrl({
+								latitude: park.latitude,
+								longitude: park.longitude,
+							}),
+						);
+					}
 				}
 
 				// Release Telegram's button *before* navigating. Its spinner is
